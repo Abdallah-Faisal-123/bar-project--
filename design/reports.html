@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>تقارير المبيعات</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = { darkMode: 'class' }
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+  <header class="p-4 bg-white dark:bg-gray-800 shadow flex items-center justify-between">
+    <h2 class="text-lg font-semibold">تقارير المبيعات</h2>
+    <a href="manager.html" class="px-3 py-1 bg-gray-100 rounded">العودة</a>
+  </header>
+
+  <main class="p-6 space-y-6">
+    <section class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <canvas id="salesChart"></canvas>
+      </div>
+      <div class="p-4 bg-white dark:bg-gray-800 rounded shadow">
+        <canvas id="stockChart"></canvas>
+      </div>
+    </section>
+  </main>
+
+  <script src="./app.js"></script>
+</body>
+</html>
