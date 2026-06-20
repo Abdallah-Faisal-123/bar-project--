@@ -9,9 +9,32 @@ export default function Seller() {
   const [error, setError] = useState(null)
   const [sellingId, setSellingId] = useState(null)
 
+  // State for purchase requests
+  const [purchaseRequests, setPurchaseRequests] = useState([])
+  const [loadingPurchases, setLoadingPurchases] = useState(true)
+
   useEffect(() => {
     fetchAssignedProducts()
+    fetchPurchaseRequests()
   }, [user])
+
+  async function fetchPurchaseRequests() {
+    try {
+      setLoadingPurchases(true)
+      const { data, error: fetchErr } = await supabase
+        .from('purchase_requests')
+        .select('*')
+        .order('id', { ascending: false })
+
+      if (fetchErr) throw fetchErr
+      setPurchaseRequests(data || [])
+    } catch (err) {
+      console.error('Error fetching purchase requests:', err)
+      setError('حدث خطأ أثناء تحميل طلبات الشراء المطلوبة')
+    } finally {
+      setLoadingPurchases(false)
+    }
+  }
 
   async function fetchAssignedProducts() {
     if (!user) return
@@ -108,6 +131,52 @@ export default function Seller() {
 
       {error && <div className="error-message" style={{ marginBottom: 24 }}>{error}</div>}
 
+      {/* Required Purchase Requests Section */}
+      <div className="card animate-fade-in-up stagger-2" style={{ marginBottom: 32, padding: 0, overflow: 'hidden' }}>
+        <div className="card-header" style={{ padding: '16px 24px', borderBottom: '1px solid var(--color-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 className="card-title">📋 طلبات الشراء المطلوبة (مشتريات للوردية)</h2>
+          <button
+            onClick={fetchPurchaseRequests}
+            className="btn btn-secondary"
+            disabled={loadingPurchases}
+            style={{ padding: '6px 12px', fontSize: '0.875rem' }}
+          >
+            {loadingPurchases ? 'جاري التحميل...' : '🔄 تحديث القائمة'}
+          </button>
+        </div>
+
+        {loadingPurchases ? (
+          <div style={{ textAlign: 'center', padding: 24, color: 'var(--color-text-muted)' }}>جاري تحميل طلبات الشراء...</div>
+        ) : purchaseRequests.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: 32, color: 'var(--color-text-muted)' }}>
+            💡 لا توجد طلبات شراء مطلوبة حالياً من المدير.
+          </div>
+        ) : (
+          <div className="table-wrapper" style={{ margin: 0, border: 'none', borderRadius: 0 }}>
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>اسم المنتج المطلوب</th>
+                  <th>الكمية المطلوبة</th>
+                  <th>سعر الشراء المقدر</th>
+                  <th>التكلفة الإجمالية</th>
+                </tr>
+              </thead>
+              <tbody>
+                {purchaseRequests.map(req => (
+                  <tr key={req.id}>
+                    <td style={{ fontWeight: 600 }}>{req.product_name}</td>
+                    <td><span className="badge badge-primary">{req.quantity}</span></td>
+                    <td>{req.price} ج.م</td>
+                    <td style={{ fontWeight: 600}}>{(req.quantity * req.price).toFixed(2)} ج.م <input type="checkbox"  /> </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
       {/* Products Grid */}
       {loading ? (
         <div style={{ textAlign: 'center', padding: 40, color: 'var(--color-text-muted)' }}>جارٍ التحميل...</div>
@@ -133,7 +202,7 @@ export default function Seller() {
             return (
               <div
                 key={product.id}
-                className={`product-card animate-fade-in-up stagger-${Math.min(i + 2, 6)}`}
+                className={`product-card animate-fade-in-up stagger-${Math.min(i + 3, 7)}`}
                 style={isSoldOut ? { opacity: 0.65 } : {}}
               >
                 {/* Product Name */}

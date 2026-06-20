@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function Purchase() {
@@ -9,6 +9,11 @@ export default function Purchase() {
   const [name, setName] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [price, setprice] = useState('')
+
+  useEffect(() => {
+    fetchItems()
+  }, [])
+
   async function fetchItems() {
   const { data, error } = await supabase
     .from('purchase_requests')
@@ -55,21 +60,43 @@ async function handleAddItem(e) {
 }
 
   // Delete Individual Item
-  function handleDeleteItem(itemId) {
+  async function handleDeleteItem(itemId) {
+    setError(null)
+    const { error: delErr } = await supabase
+      .from('purchase_requests')
+      .delete()
+      .eq('id', itemId)
+
+    if (delErr) {
+      console.error(delErr)
+      setError('فشل حذف العنصر من قاعدة البيانات')
+      return
+    }
     setItems(prev => prev.filter(item => item.id !== itemId))
   }
 
   // Clear All Items
-  function handleClearAll() {
+  async function handleClearAll() {
     if (items.length === 0) return
     if (!window.confirm('هل أنت متأكد من رغبتك في مسح كل عناصر هذا الطلب؟')) return
+    setError(null)
+    const { error: delErr } = await supabase
+      .from('purchase_requests')
+      .delete()
+      .gt('id', 0)
+
+    if (delErr) {
+      console.error(delErr)
+      setError('فشل مسح العناصر من قاعدة البيانات')
+      return
+    }
     setItems([])
   }
 
   // Stats
   const totalItemsCount = items.length
   const totalQuantity = items.reduce((acc, item) => acc + (item.quantity || 0), 0)
-  const totalCost = items.reduce((acc, item) => acc + ((item.quantity || 0) * (item.unit_price || 0)), 0)
+  const totalCost = items.reduce((acc, item) => acc + ((item.quantity || 0) * (item.price || 0)), 0)
 
   return (
     <div className="animate-fade-in-up">
@@ -200,10 +227,10 @@ async function handleAddItem(e) {
                 <tbody>
                   {items.map(item => (
                     <tr key={item.id}>
-                      <td style={{ fontWeight: 600 }}>{item.name}</td>
+                      <td style={{ fontWeight: 600 }}>{item.product_name}</td>
                       <td><span className="badge badge-primary">{item.quantity}</span></td>
-                      <td>{item.unit_price} ج.م</td>
-                      <td style={{ fontWeight: 600 }}>{(item.quantity * item.unit_price).toFixed(2)} ج.م</td>
+                      <td>{item.price} ج.م</td>
+                      <td style={{ fontWeight: 600 }}>{(item.quantity * item.price).toFixed(2)} ج.م</td>
                       <td>
                         <button
                           onClick={() => handleDeleteItem(item.id)}

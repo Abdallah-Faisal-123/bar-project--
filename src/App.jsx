@@ -53,6 +53,10 @@ function Nav() {
                     <span>📋</span>
                     <span>لوحة المدير</span>
                   </Link>
+                  <Link to="/purchase" className={`nav-link${isActive('/purchase')}`}>
+                    <span>🛍️</span>
+                    <span>طلبات الشراء</span>
+                  </Link>
                   <Link to="/reports" className={`nav-link${isActive('/reports')}`}>
                     <span>📊</span>
                     <span>التقارير</span>
