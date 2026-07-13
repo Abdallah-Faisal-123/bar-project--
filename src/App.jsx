@@ -1,6 +1,7 @@
 import React from 'react'
 import { Routes, Route, Link, Navigate, useLocation } from 'react-router-dom'
 import { useAuth } from './context/AuthContext'
+import { useTheme } from './context/ThemeContext'
 import ProtectedRoute from './components/ProtectedRoute'
 import Login from './pages/Login'
 import Register from './pages/Register'
@@ -13,6 +14,7 @@ import './index.css'
 /* ── Navigation Bar ── */
 function Nav() {
   const { user, logout, loading } = useAuth()
+  const { theme, toggleTheme } = useTheme()
   const location = useLocation()
 
   function isActive(path) {
@@ -86,6 +88,16 @@ function Nav() {
               </button>
             </>
           )}
+
+          {/* Theme Toggle */}
+          <button
+            onClick={toggleTheme}
+            className="theme-toggle-btn"
+            aria-label="Toggle Theme"
+            title={theme === 'light' ? 'تفعيل الوضع الداكن' : 'تفعيل الوضع المضيء'}
+          >
+            {theme === 'light' ? '🌙' : '☀️'}
+          </button>
         </nav>
       </div>
     </header>

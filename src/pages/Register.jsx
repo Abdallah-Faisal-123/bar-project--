@@ -8,6 +8,7 @@ export default function Register() {
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('Seller')
+  const [managerPassword, setManagerPassword] = useState('')
   const [loading, setLoading] = useState(false)
 
   async function handleSubmit(e) {
@@ -17,6 +18,19 @@ export default function Register() {
     if (!fullName.trim() || !username.trim() || !password) {
       setError('الرجاء تعبئة جميع الحقول')
       return
+    }
+
+    // Require manager code/password for Sellers and Managers
+    if (role === 'Seller' || role === 'Manager') {
+      if (!managerPassword) {
+        setError('الرجاء إدخال رمز تفويض المدير')
+        return
+      }
+      const SECRET_CODE = 'Eng.Abdallah-Faisal' // Default authorization password
+      if (managerPassword !== SECRET_CODE) {
+        setError('رمز تفويض المدير غير صحيح!')
+        return
+      }
     }
 
     setLoading(true)
@@ -61,12 +75,12 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="reg-username">اسم المستخدم</label>
+            <label className="form-label" htmlFor="reg-username"> البريد الالكتروني</label>
             <input
               id="reg-username"
               className="form-input"
               type="text"
-              placeholder="أدخل اسم المستخدم"
+              placeholder="أدخل البريدالالكتروني"
               value={username}
               onChange={e => setUsername(e.target.value)}
               autoComplete="username"
@@ -75,7 +89,7 @@ export default function Register() {
           </div>
 
           <div className="form-group">
-            <label className="form-label" htmlFor="reg-password">كلمة المرور</label>
+            <label className="form-label" htmlFor="reg-password">كلمة المرور </label>
             <input
               id="reg-password"
               className="form-input"
@@ -109,6 +123,22 @@ export default function Register() {
               </div>
             </div>
           </div>
+
+          {/* Manager Code Input */}
+          {(role === 'Seller' || role === 'Manager') && (
+            <div className="form-group animate-fade-in">
+              <label className="form-label" htmlFor="reg-manager-password">رمز تفويض المدير</label>
+              <input
+                id="reg-manager-password"
+                className="form-input"
+                type="password"
+                placeholder="أدخل رمز تفويض المدير لإتمام التسجيل"
+                value={managerPassword}
+                onChange={e => setManagerPassword(e.target.value)}
+                disabled={loading}
+              />
+            </div>
+          )}
 
           <button
             type="submit"
