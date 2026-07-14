@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { supabase } from '../lib/supabase'
 
 export default function Register() {
   const { register, error, setError } = useAuth()
@@ -20,15 +21,31 @@ export default function Register() {
       return
     }
 
-    // Require manager code/password for Sellers and Managers
+    // Require manager code for Sellers and Managers — verified securely on server
     if (role === 'Seller' || role === 'Manager') {
       if (!managerPassword) {
         setError('الرجاء إدخال رمز تفويض المدير')
         return
       }
-      const SECRET_CODE = 'Eng.Abdallah-Faisal' // Default authorization password
-      if (managerPassword !== SECRET_CODE) {
-        setError('رمز تفويض المدير غير صحيح!')
+
+      try {
+        const { data: isValid, error: rpcError } = await supabase.rpc('verify_manager_code', {
+          entered_code: managerPassword,
+        })
+
+        if (rpcError) {
+          console.error('RPC error:', rpcError)
+          setError('حدث خطأ أثناء التحقق من رمز التفويض. حاول مرة أخرى.')
+          return
+        }
+
+        if (!isValid) {
+          setError('رمز تفويض المدير غير صحيح!')
+          return
+        }
+      } catch (err) {
+        console.error('Verification error:', err)
+        setError('حدث خطأ أثناء التحقق من رمز التفويض.')
         return
       }
     }
